@@ -2,6 +2,7 @@
 import { Header } from '@/components/shopnepal/header';
 import { Footer } from '@/components/shopnepal/footer';
 import { API_URL } from '@/lib/shopnepal';
+import { PrintButton } from '@/components/shopnepal/print-button';
 
 export default async function LabelPage({ params }:{ params: Promise<{uuid:string}>}){
   const { uuid } = await params;
@@ -19,7 +20,7 @@ export default async function LabelPage({ params }:{ params: Promise<{uuid:strin
       <Header/>
       <main className="container" style={{padding:'30px 15px 60px', maxWidth:480, margin:'0 auto'}}>
         <div style={{display:'flex', gap:10, marginBottom:16}}>
-          <button onClick={()=>window.print()} style={{padding:'10px 18px', background:'hsl(0,0%,13%)', color:'#fff', borderRadius:6}}>Print label</button>
+          <PrintButton style={{padding:'10px 18px', background:'hsl(0,0%,13%)', color:'#fff', borderRadius:6}}>Print label</PrintButton>
           <a href={`/invoice/${order.transactionUuid}`} style={{padding:'10px 18px', border:'1px solid hsl(0,0%,93%)', borderRadius:6}}>Invoice</a>
         </div>
         <article style={{border:'2px solid hsl(0,0%,13%)', borderRadius:10, overflow:'hidden'}}>

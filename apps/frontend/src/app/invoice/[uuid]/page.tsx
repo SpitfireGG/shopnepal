@@ -2,6 +2,7 @@
 import { Header } from '@/components/shopnepal/header';
 import { Footer } from '@/components/shopnepal/footer';
 import { API_URL, formatNPR } from '@/lib/shopnepal';
+import { PrintButton } from '@/components/shopnepal/print-button';
 
 export default async function InvoicePage({ params }:{ params: Promise<{uuid:string}>}){
   const { uuid } = await params;
@@ -37,7 +38,7 @@ export default async function InvoicePage({ params }:{ params: Promise<{uuid:str
           </div>
         </div>
         <div style={{textAlign:'center', marginTop:24}}>
-          <button onClick={()=>window.print()} style={{padding:'10px 18px', background:'hsl(0,0%,13%)', color:'#fff', borderRadius:6}}>Download / Print</button>
+          <PrintButton style={{padding:'10px 18px', background:'hsl(0,0%,13%)', color:'#fff', borderRadius:6}}>Download / Print</PrintButton>
         </div>
       </main>
       <Footer/>
