@@ -10,7 +10,7 @@ export default function TrackPage(){
   const [err,setErr]=useState('');
   const go=async(e:any)=>{
     e.preventDefault(); setErr(''); setData(null);
-    const r=await fetch((process.env.NEXT_PUBLIC_API_URL||'http://localhost:3000') + `/api/track/${encodeURIComponent(uuid.trim())}`);
+    const r=await fetch((process.env.NEXT_PUBLIC_API_URL||'http://localhost:4000') + `/api/track/${encodeURIComponent(uuid.trim())}`);
     const j=await r.json(); if(j.error) setErr(j.error); else setData(j);
   };
   return (

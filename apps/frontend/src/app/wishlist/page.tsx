@@ -4,6 +4,7 @@ import { Header } from '@/components/shopnepal/header';
 import { Footer } from '@/components/shopnepal/footer';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { IonIcon } from '@/components/shopnepal/ion-icon';
 
 export default function WishlistPage(){
   const [ids,setIds]=useState<string[]>([]);
@@ -11,7 +12,8 @@ export default function WishlistPage(){
   useEffect(()=>{
     setIds(JSON.parse(localStorage.getItem('shopnepal.wishlist')||'[]'));
     try{ const p=JSON.parse(localStorage.getItem('shopnepal.wishlist')||'[]'); setIds(p); }catch{}
-    fetch((process.env.NEXT_PUBLIC_API_URL||'http://localhost:3000')+'/api/products').then(r=>r.json()).then(setProducts).catch(()=>{});
+    const base = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+    fetch(`${base}/api/products`).then(r=>r.json()).then(setProducts).catch(()=>{});
     const onStorage=()=> setIds(JSON.parse(localStorage.getItem('shopnepal.wishlist')||'[]'));
     window.addEventListener('storage', onStorage);
     return ()=> window.removeEventListener('storage', onStorage);
@@ -31,8 +33,8 @@ export default function WishlistPage(){
                   <div className="showcase-actions">
                     <button className="btn-action" style={{color:'hsl(353,100%,78%)'}} onClick={()=>{
                       const w=JSON.parse(localStorage.getItem('shopnepal.wishlist')||'[]'); const n=w.filter((x:string)=>x!==p.id); localStorage.setItem('shopnepal.wishlist', JSON.stringify(n)); setIds(n);
-                    }}><ion-icon name="heart"></ion-icon></button>
-                    <Link href={`/product/${p.slug}`} className="btn-action"><ion-icon name="eye-outline"></ion-icon></Link>
+                    }}><IonIcon name="heart" /></button>
+                    <Link href={`/product/${p.slug}`} className="btn-action"><IonIcon name="eye-outline" /></Link>
                   </div>
                 </div>
                 <div className="showcase-content">

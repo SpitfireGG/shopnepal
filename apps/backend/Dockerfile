@@ -11,7 +11,11 @@ RUN npm install
 
 COPY apps/backend/ ./
 RUN npm run build
+COPY apps/frontend/public ./public
+COPY server ./server
+COPY apps/server ./apps/server
+RUN mkdir -p /server && cp -r ./server/* /server/ 2>/dev/null || true
 
 ENV STATIC_ROOT=/app/public
-EXPOSE 3000
+EXPOSE 4000
 CMD ["node","dist/main.js"]

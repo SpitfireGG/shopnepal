@@ -2,6 +2,9 @@
 import { Header } from '@/components/shopnepal/header';
 import { Footer } from '@/components/shopnepal/footer';
 import { getProductBySlug, formatNPR, API_URL } from '@/lib/shopnepal';
+import { IonIcon } from '@/components/shopnepal/ion-icon';
+import { ProductDetailActions } from '@/components/shopnepal/product-detail-actions';
+import { ProductActions } from '@/components/shopnepal/product-actions';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
@@ -28,26 +31,41 @@ export default async function ProductPage({ params }:{ params: Promise<{slug:str
           <div>
             <p className="showcase-category">{product.category}</p>
             <h1 className="title" style={{marginBottom:10}}>{product.title}</h1>
-            <div className="showcase-rating" style={{color:'hsl(29,90%,65%)', marginBottom:10}}>{Array.from({length:5}).map((_,i)=><ion-icon key={i} name={i < product.rating ? 'star' : 'star-outline'}></ion-icon>)}</div>
+            <div className="showcase-rating" style={{ color: 'hsl(29,90%,65%)', marginBottom: 10 }}>{Array.from({ length: 5 }).map((_, i) => <IonIcon key={i} name={i < product.rating ? 'star' : 'star-outline'} />)}</div>
             <div className="price-box" style={{fontSize:'1.5rem', gap:10, marginBottom:16}}><p className="price" style={{color:'hsl(353,100%,78%)', fontWeight:700}}>{formatNPR(product.price)}</p>{product.compareAt && <del style={{color:'hsl(0,0%,47%)'}}>{formatNPR(product.compareAt)}</del>}</div>
             <p style={{color:'hsl(0,0%,47%)', lineHeight:1.6, marginBottom:16}}>{product.description || 'Premium quality product from ShopNepal. Cash on delivery available across Nepal.'}</p>
             <div style={{display:'flex', gap:10, marginBottom:16}}>
               <span style={{fontSize:12, padding:'6px 10px', border:'1px solid hsl(0,0%,93%)', borderRadius:6}}>Stock: {product.stock}</span>
               {product.sizes && <span style={{fontSize:12, padding:'6px 10px', border:'1px solid hsl(0,0%,93%)', borderRadius:6}}>Sizes: {product.sizes.join(', ')}</span>}
             </div>
-            <button className="banner-btn" style={{padding:'12px 28px', fontSize:14}} onClick={()=>{}}>Add to Bag</button>
-            <div style={{marginTop:16, display:'grid', gridTemplateColumns:'1fr 1fr', gap:10}}>
-              <Link href={`/visual-search`} style={{padding:'10px', border:'1px solid hsl(0,0%,93%)', borderRadius:8, textAlign:'center', fontSize:12}}>📷 Visual Search</Link>
-              <Link href={`/stylist?anchor=${product.id}`} style={{padding:'10px', border:'1px solid hsl(0,0%,93%)', borderRadius:8, textAlign:'center', fontSize:12}}>✨ AI Stylist</Link>
-              <Link href={`/provenance/${product.id}`} style={{padding:'10px', border:'1px solid hsl(0,0%,93%)', borderRadius:8, textAlign:'center', fontSize:12}}>🔗 Provenance Pass</Link>
-              <a href="#" style={{padding:'10px', border:'1px solid hsl(0,0%,93%)', borderRadius:8, textAlign:'center', fontSize:12, background:'hsl(0,0%,13%)', color:'#fff'}}>👓 AR Try-On</a>
+            <ProductDetailActions product={product} />
+            <div style={{marginTop:16, border:'1px solid hsl(0,0%,93%)', borderRadius:10, background:'hsl(0,0%,98%)', padding:12}}>
+              <p style={{fontSize:11, fontWeight:600, letterSpacing:1, color:'hsl(0,0%,47%)', marginBottom:10}}>SPOTLIGHT • TRY IT</p>
+              <div style={{display:'grid', gridTemplateColumns:'1fr 1fr', gap:8}}>
+                <Link href="/visual-search" style={{display:'flex', alignItems:'center', gap:10, padding:'10px 12px', border:'1px solid hsl(0,0%,93%)', borderRadius:8, background:'#fff'}}>
+                  <span style={{width:32, height:32, borderRadius:'50%', background:'hsl(0,0%,98%)', border:'1px solid hsl(0,0%,93%)', display:'grid', placeItems:'center'}}>📷</span>
+                  <span><span style={{display:'block', fontSize:12, fontWeight:600, lineHeight:1}}>Visual Search</span><span style={{display:'block', fontSize:10, color:'hsl(0,0%,47%)'}}>Photo → similar</span></span>
+                </Link>
+                <Link href={`/stylist?anchor=${product.id}`} style={{display:'flex', alignItems:'center', gap:10, padding:'10px 12px', border:'1px solid hsl(0,0%,93%)', borderRadius:8, background:'#fff'}}>
+                  <span style={{width:32, height:32, borderRadius:'50%', background:'hsl(0,0%,98%)', border:'1px solid hsl(0,0%,93%)', display:'grid', placeItems:'center'}}>✨</span>
+                  <span><span style={{display:'block', fontSize:12, fontWeight:600, lineHeight:1}}>AI Stylist</span><span style={{display:'block', fontSize:10, color:'hsl(0,0%,47%)'}}>Complete look</span></span>
+                </Link>
+                <Link href={`/provenance/${product.id}`} style={{display:'flex', alignItems:'center', gap:10, padding:'10px 12px', border:'1px solid hsl(0,0%,93%)', borderRadius:8, background:'#fff'}}>
+                  <span style={{width:32, height:32, borderRadius:'50%', background:'hsl(0,0%,98%)', border:'1px solid hsl(0,0%,93%)', display:'grid', placeItems:'center'}}>🔗</span>
+                  <span><span style={{display:'block', fontSize:12, fontWeight:600, lineHeight:1}}>Provenance</span><span style={{display:'block', fontSize:10, color:'hsl(0,0%,47%)'}}>IPFS • Polygon</span></span>
+                </Link>
+                <a href="/ar" style={{display:'flex', alignItems:'center', gap:10, padding:'10px 12px', borderRadius:8, background:'hsl(0,0%,13%)', color:'#fff'}}>
+                  <span style={{width:32, height:32, borderRadius:'50%', background:'rgba(255,255,255,.15)', display:'grid', placeItems:'center'}}>👓</span>
+                  <span><span style={{display:'block', fontSize:12, fontWeight:600, lineHeight:1}}>AR Try-On</span><span style={{display:'block', fontSize:10, color:'rgba(255,255,255,.7)'}}>No app • Camera</span></span>
+                </a>
+              </div>
             </div>
-            <div style={{marginTop:16, padding:12, border:'1px dashed hsl(0,0%,93%)', borderRadius:8, background:'hsl(152,51%,98%)'}}>
+            <div id="ar" style={{marginTop:10, padding:12, border:'1px dashed hsl(0,0%,93%)', borderRadius:10, background:'hsl(152,51%,98%)'}}>
               <p style={{fontSize:12, fontWeight:600}}>AR Try-On • model-viewer</p>
-              <div style={{height:160, background:'#fff', borderRadius:8, marginTop:8, display:'grid', placeItems:'center', border:'1px solid hsl(0,0%,93%)'}}>
+              <div style={{height:140, background:'#fff', borderRadius:8, marginTop:8, display:'grid', placeItems:'center', border:'1px solid hsl(0,0%,93%)', textAlign:'center'}}>
                 <p style={{fontSize:12, color:'hsl(0,0%,47%)'}}>Camera preview — {product.title}<br/>Move to fit • Pinch to scale</p>
               </div>
-              <p style={{fontSize:11, color:'hsl(0,0%,47%)', marginTop:6}}>WebAR • No app • Works on mobile</p>
+              <p style={{fontSize:11, color:'hsl(0,0%,47%)', marginTop:6}}>WebAR • Works on mobile • ShopNepal</p>
             </div>
             <div style={{marginTop:24, display:'flex', gap:10}}>
               <Link href="/cart" className="btn-newsletter" style={{padding:'10px 18px', background:'hsl(0,0%,13%)', color:'#fff', borderRadius:6}}>Go to Bag</Link>
@@ -63,9 +81,7 @@ export default async function ProductPage({ params }:{ params: Promise<{slug:str
               <div key={p.id} className="showcase">
                 <div className="showcase-banner">
                   <img src={p.images?.[0]} alt={p.title} width={300} className="product-img default"/>
-                  <div className="showcase-actions">
-                    <Link href={`/product/${p.slug}`} className="btn-action"><ion-icon name="eye-outline"></ion-icon></Link>
-                  </div>
+                  <ProductActions product={p} />
                 </div>
                 <div className="showcase-content">
                   <Link href={`/product/${p.slug}`} className="showcase-category">{p.category}</Link>

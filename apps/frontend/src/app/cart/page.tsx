@@ -7,23 +7,52 @@ import { useEffect, useState } from 'react';
 export default function CartPage(){
   const [items,setItems]=useState<any[]>([]);
   const [products,setProducts]=useState<any[]>([]);
+  const [selected,setSelected]=useState<Set<string>>(new Set());
   useEffect(()=>{
     const raw=JSON.parse(localStorage.getItem('shopnepal.cart.v1')||'[]');
     setItems(raw);
-    fetch((process.env.NEXT_PUBLIC_API_URL||'http://localhost:3000') + '/api/products').then(r=>r.json()).then(setProducts).catch(()=>{});
+    const keys=new Set(raw.map((l:any)=>`${l.id}::${l.size||''}`));
+    setSelected(keys);
+    const base = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+    fetch(`${base}/api/products`).then(r=>r.json()).then(setProducts).catch(()=>{});
   },[]);
+  const persist=(next:any[])=>{
+    setItems(next);
+    localStorage.setItem('shopnepal.cart.v1', JSON.stringify(next));
+    window.dispatchEvent(new Event('shopnepal:cart-changed'));
+  };
+  const removeItem=(key:string)=>{
+    const next=items.filter((l:any)=> `${l.id}::${l.size||''}`!==key);
+    const ns=new Set(selected); ns.delete(key); setSelected(ns); persist(next);
+  };
+  const updateQty=(key:string, delta:number)=>{
+    const next=items.map((l:any)=> {
+      if(`${l.id}::${l.size||''}`===key){
+        const q=Math.max(1, (l.qty||1)+delta);
+        return {...l, qty:q};
+      }
+      return l;
+    });
+    persist(next);
+  };
+  const toggle=(key:string)=>{
+    const ns=new Set(selected);
+    if(ns.has(key)) ns.delete(key); else ns.add(key);
+    setSelected(ns);
+  };
+  const toggleAll=()=>{
+    if(selected.size===items.length) setSelected(new Set());
+    else setSelected(new Set(items.map((l:any)=>`${l.id}::${l.size||''}`)));
+  };
   const detailed=items.map((l:any)=>{
     const p=products.find((pp:any)=>pp.id===l.id);
-    return p ? { ...l, product:p, lineTotal: p.price*l.qty } : null;
+    return p ? { ...l, product:p, lineTotal: p.price*l.qty, key:`${l.id}::${l.size||''}` } : null;
   }).filter(Boolean);
-  const subtotal=detailed.reduce((s:any,l:any)=>s+l.lineTotal,0);
-  const delivery=100;
-  const [months,setMonths]=useState(3);
-  const [bnpl,setBnpl]=useState<any>(null);
-  useEffect(()=>{
-    if(subtotal>0) fetch((process.env.NEXT_PUBLIC_API_URL||'http://localhost:3000')+'/api/spotlight/bnpl/calc', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ amount: subtotal+delivery, months })}).then(r=>r.json()).then(setBnpl).catch(()=>{});
-  },[subtotal, months]);
+  const selectedDetailed=detailed.filter((l:any)=> selected.has(l.key));
+  const subtotal=selectedDetailed.reduce((s:any,l:any)=>s+l.lineTotal,0);
+  const delivery=selectedDetailed.length?100:0;
   const total=subtotal+delivery;
+  const allSelected=items.length>0 && selected.size===items.length;
   return (
     <>
       <Header/>
@@ -32,33 +61,38 @@ export default function CartPage(){
         {detailed.length===0 ? <p style={{padding:40, textAlign:'center', color:'hsl(0,0%,47%)'}}>Your bag is empty. <a href="/" style={{color:'hsl(353,100%,78%)'}}>Continue shopping</a></p> : (
           <div style={{display:'grid', gridTemplateColumns:'1fr 360px', gap:24}}>
             <div style={{border:'1px solid hsl(0,0%,93%)', borderRadius:10, overflow:'hidden'}}>
+              <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', padding:'10px 12px', borderBottom:'1px solid hsl(0,0%,93%)', background:'hsl(0,0%,98%)'}}>
+                <label style={{display:'flex', alignItems:'center', gap:8, fontSize:13, cursor:'pointer'}}><input type="checkbox" checked={allSelected} onChange={toggleAll}/> Select all ({selected.size}/{detailed.length})</label>
+                <span style={{fontSize:12, color:'hsl(0,0%,47%)'}}>Uncheck to exclude from checkout</span>
+              </div>
               <table className="doc-table" style={{width:'100%'}}>
-                <thead><tr><th>Item</th><th>Qty</th><th>Price</th></tr></thead>
+                <thead><tr><th style={{width:36}}></th><th>Item</th><th>Qty</th><th>Price</th><th></th></tr></thead>
                 <tbody>
                   {detailed.map((l:any,i:number)=>(
-                    <tr key={i}><td>{l.product.title} {l.size?`(${l.size})`:''}</td><td>{l.qty}</td><td>Rs. {l.lineTotal.toLocaleString('en-IN')}</td></tr>
+                    <tr key={l.key} style={{opacity: selected.has(l.key)?1:0.45}}>
+                      <td><input type="checkbox" checked={selected.has(l.key)} onChange={()=>toggle(l.key)} /></td>
+                      <td><div style={{fontWeight:500}}>{l.product.title}</div><div style={{fontSize:11, color:'hsl(0,0%,47%)'}}>{l.size?`Size ${l.size} • `:''}{l.product.category}</div></td>
+                      <td>
+                        <div style={{display:'flex', alignItems:'center', gap:6}}>
+                          <button onClick={()=>updateQty(l.key,-1)} style={{width:24,height:24,border:'1px solid hsl(0,0%,93%)',borderRadius:4,background:'#fff'}}>-</button>
+                          <span style={{minWidth:20,textAlign:'center'}}>{l.qty}</span>
+                          <button onClick={()=>updateQty(l.key,1)} style={{width:24,height:24,border:'1px solid hsl(0,0%,93%)',borderRadius:4,background:'#fff'}}>+</button>
+                        </div>
+                      </td>
+                      <td>Rs. {l.lineTotal.toLocaleString('en-IN')}</td>
+                      <td><button onClick={()=>removeItem(l.key)} style={{fontSize:11,color:'hsl(0,84%,60%)',border:'none',background:'none',cursor:'pointer'}}>Remove</button></td>
+                    </tr>
                   ))}
                 </tbody>
               </table>
             </div>
-            <div style={{border:'1px solid hsl(0,0%,93%)', borderRadius:10, padding:18}}>
+            <div style={{border:'1px solid hsl(0,0%,93%)', borderRadius:10, padding:18, height:'fit-content', position:'sticky', top:20}}>
               <h3 style={{fontWeight:600, marginBottom:12}}>Order summary</h3>
-              <div style={{display:'flex', justifyContent:'space-between', padding:'8px 0', borderBottom:'1px solid hsl(0,0%,93%)'}}><span>Subtotal</span><span>Rs. {subtotal.toLocaleString('en-IN')}</span></div>
-              <div style={{display:'flex', justifyContent:'space-between', padding:'8px 0', borderBottom:'1px solid hsl(0,0%,93%)'}}><span>Delivery</span><span>Rs. {delivery.toLocaleString('en-IN')}</span></div>
+              <div style={{display:'flex', justifyContent:'space-between', padding:'8px 0', borderBottom:'1px solid hsl(0,0%,93%)'}}><span>Subtotal ({selectedDetailed.length} selected)</span><span>Rs. {subtotal.toLocaleString('en-IN')}</span></div>
+              <div style={{display:'flex', justifyContent:'space-between', padding:'8px 0', borderBottom:'1px solid hsl(0,0%,93%)'}}><span>Delivery</span><span>{delivery?`Rs. ${delivery.toLocaleString('en-IN')}`:'—'}</span></div>
               <div style={{display:'flex', justifyContent:'space-between', padding:'12px 0', fontWeight:700}}><span>Total</span><span>Rs. {total.toLocaleString('en-IN')}</span></div>
-              <div style={{marginTop:12, padding:12, border:'1px solid hsl(152,51%,52%)', borderRadius:8, background:'hsla(152,51%,52%,.08)'}}>
-                <p style={{fontSize:12, fontWeight:600}}>BNPL • {bnpl?.provider || 'eSewa EMI'}</p>
-                <div style={{display:'flex', gap:6, marginTop:8}}>
-                  {[3,6,12].map(m=>(
-                    <button key={m} onClick={()=>setMonths(m)} style={{flex:1, padding:'8px', border:'1px solid', borderColor: months===m ? 'hsl(152,51%,52%)' : 'hsl(0,0%,93%)', borderRadius:6, background: months===m ? 'hsl(152,51%,52%)' : '#fff', color: months===m ? '#fff' : '#000', fontSize:12}}>
-                      {m} mo
-                    </button>
-                  ))}
-                </div>
-                {bnpl && <p style={{fontSize:12, marginTop:8, color:'hsl(0,0%,47%)'}}>Rs. {bnpl.monthly.toLocaleString('en-IN')} × {bnpl.months} = Rs. {bnpl.total.toLocaleString('en-IN')} {bnpl.rate>0?`(+${bnpl.rate*100}%)`:'(0% interest)'}</p>}
-              </div>
-              <button className="banner-btn" style={{width:'100%', marginTop:12, padding:'12px'}}>Proceed to Checkout</button>
-              <p style={{fontSize:11, color:'hsl(0,0%,47%)', marginTop:8, textAlign:'center'}}>eSewa • Khalti • BNPL • Nepal</p>
+              <a href={selectedDetailed.length?`/checkout?selected=${encodeURIComponent(JSON.stringify(items.filter((l:any)=> selected.has(`${l.id}::${l.size||''}`))))}`:'/checkout'} className="banner-btn" style={{width:'100%', marginTop:12, padding:'12px', display:'block', textAlign:'center', background: selectedDetailed.length?'hsl(0,0%,13%)':'hsl(0,0%,93%)', color: selectedDetailed.length?'#fff':'hsl(0,0%,47%)', borderRadius:6, pointerEvents: selectedDetailed.length?'auto':'none'}}>Proceed to Checkout {selectedDetailed.length?`(${selectedDetailed.length})`:''}</a>
+              <p style={{fontSize:11, color:'hsl(0,0%,47%)', marginTop:8, textAlign:'center'}}>eSewa • Khalti • Nepal — only checked items will be ordered</p>
             </div>
           </div>
         )}

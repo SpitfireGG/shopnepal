@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 
-const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
 export default function CourierPage({ params }: { params: Promise<{orderId: string}>}){
   const [orderId,setOrderId]=useState('');

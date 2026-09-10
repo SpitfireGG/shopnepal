@@ -1566,7 +1566,8 @@ body::-webkit-scrollbar-thumb:hover { background: hsl(0, 0%, 70%); }
 
 .product-grid .showcase:hover .product-img.hover { opacity: 1; }
 
-.product-grid .showcase:hover .product-img.default { opacity: 0; }
+.product-grid .showcase:has(.product-img.hover):hover .product-img.default { opacity: 0; }
+.product-grid .showcase:not(:has(.product-img.hover)):hover .product-img.default { opacity: 1; }
 
 .product-grid .showcase:hover .product-img { -webkit-transform: scale(1.1); -ms-transform: scale(1.1); transform: scale(1.1); }
 

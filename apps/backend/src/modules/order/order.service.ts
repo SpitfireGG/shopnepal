@@ -12,10 +12,11 @@ export class OrderService {
   get(uuid: string) { return this.repo().findOne({ where: { transactionUuid: uuid } }); }
   async create(dto: any) {
     const max = (await this.repo().createQueryBuilder('o').select('MAX(o.orderNumber)', 'max').getRawOne()).max || 1000;
-    const order = this.repo().create({ ...dto, orderNumber: max + 1, paymentStatus: 'PENDING', status: 'PENDING' });
+    const { lines, ...orderData } = dto;
+    const order = this.repo().create({ ...orderData, orderNumber: max + 1, paymentStatus: 'PENDING', status: 'PENDING' });
     const savedArr = await this.repo().save(order as any);
     const saved: any = Array.isArray(savedArr) ? savedArr[0] : savedArr;
-    for (const l of dto.lines) {
+    for (const l of lines || []) {
       const line = AppDataSource.getRepository(OrderLine).create({ orderUuid: saved.transactionUuid, productId: l.id, slug: l.slug, title: l.title, size: l.size, qty: l.qty, unitPrice: l.unitPrice, lineTotal: l.lineTotal } as any);
       await AppDataSource.getRepository(OrderLine).save(line as any);
     }

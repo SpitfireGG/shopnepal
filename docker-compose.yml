@@ -23,14 +23,14 @@ services:
     container_name: shopnepal_backend
     restart: unless-stopped
     ports:
-      - "3000:3000"
+      - "4000:4000"
     environment:
       DATABASE_URL: postgres://shopnepal:shopnepal123@postgres:5432/shopnepal
-      PORT: 3000
+      PORT: 4000
       STATIC_ROOT: /app/public
       ADMIN_USER: admin
       ADMIN_PASSWORD: shopnepal123
-      PUBLIC_BASE_URL: http://localhost:3000
+      PUBLIC_BASE_URL: http://localhost:4000
       ESEWA_ENV: test
       ESEWA_PRODUCT_CODE: EPAYTEST
       ESEWA_SECRET_KEY: 8gBm/:&EnhH.1/q

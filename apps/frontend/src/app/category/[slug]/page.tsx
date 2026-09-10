@@ -3,6 +3,7 @@ import { Header } from '@/components/shopnepal/header';
 import { Footer } from '@/components/shopnepal/footer';
 import Link from 'next/link';
 import { API_URL, formatNPR } from '@/lib/shopnepal';
+import { ProductActions } from '@/components/shopnepal/product-actions';
 
 export default async function CategoryPage({ params }:{ params: Promise<{slug:string}>}){
   const { slug } = await params;
@@ -24,10 +25,7 @@ export default async function CategoryPage({ params }:{ params: Promise<{slug:st
             <div key={p.id} className="showcase">
               <div className="showcase-banner">
                 <img src={p.images?.[0]} alt={p.title} width={300} className="product-img default"/>
-                <div className="showcase-actions">
-                  <Link href={`/product/${p.slug}`} className="btn-action"><ion-icon name="eye-outline"></ion-icon></Link>
-                  <button className="btn-action"><ion-icon name="bag-add-outline"></ion-icon></button>
-                </div>
+                <ProductActions product={p} />
               </div>
               <div className="showcase-content">
                 <span className="showcase-category">{p.category}</span>

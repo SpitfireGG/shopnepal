@@ -40,11 +40,17 @@ async function bootstrap() {
   await seedCommand().catch(e => console.warn('seed failed', e.message));
 
   const app = await NestFactory.create(AppModule);
+  app.enableCors({ origin: true, credentials: true, methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS', allowedHeaders: 'Content-Type,Authorization' });
   app.useGlobalPipes(appValidationPipe);
   app.use(express.json());
   app.use(express.static(ROOT, { extensions: ['html'] }));
   app.use('/admin', express.static(path.join(ROOT, 'admin')));
   app.use('/product/:slug', (req, res) => res.sendFile(path.join(ROOT, 'product.html')));
+  // Spotlight frontend lives on 3002 — redirect legacy :3000/ar there so http://localhost:3000/ar really works
+  app.use('/ar', (req, res) => res.redirect('http://localhost:3002/ar'));
+  app.use('/visual-search', (req, res) => res.redirect('http://localhost:3002/visual-search'));
+  app.use('/stylist', (req, res) => res.redirect('http://localhost:3002/stylist'));
+  app.use('/voice', (req, res) => res.redirect('http://localhost:3002/voice'));
   /**
    * Static 404 for the storefront only.
    *
@@ -53,10 +59,13 @@ async function bootstrap() {
    * passed through with next(); unmatched API paths then get Nest's own JSON
    * 404 rather than a page of HTML.
    */
-  const NEST_PREFIXES = ['/api/', '/payment/'];
+  const NEST_PREFIXES = ['/api', '/payment'];
   app.use((req, res, next) => {
-    if (NEST_PREFIXES.some(prefix => req.path.startsWith(prefix))) return next();
-    res.status(404).sendFile(path.join(ROOT, '404.html'));
+    const p = (req as any).path || (req as any).url || req.originalUrl || '';
+    if (NEST_PREFIXES.some(prefix => p.startsWith(prefix))) return next();
+    const file = path.join(ROOT, '404.html');
+    if (fs.existsSync(file)) return res.status(404).sendFile(file);
+    return res.status(404).json({ statusCode: 404, message: 'Not Found: ' + p });
   });
 
   const port = process.env.PORT || 3000;
