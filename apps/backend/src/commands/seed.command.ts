@@ -6,7 +6,10 @@ export async function seedCommand() {
   const cr = AppDataSource.getRepository(Coupon);
   if ((await pr.count()) === 0) {
     let products: any[] = [];
-    try { products = require('../../../assets/js/products.js').PRODUCTS; } catch {}
+    try { products = require('../data/products.js').PRODUCTS; } catch {}
+    if (!products.length) {
+      try { products = require('../../../assets/js/products.js').PRODUCTS; } catch {}
+    }
     if (!products.length) {
       try { products = require('/app/assets/js/products.js').PRODUCTS; } catch {}
     }

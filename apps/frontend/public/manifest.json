@@ -1,0 +1,12 @@
+{
+  "name": "ShopNepal",
+  "short_name": "ShopNepal",
+  "description": "Nepal's eCommerce — PWA • Offline • BNPL",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#ff6b8a",
+  "icons": [
+    { "src": "/assets/images/logo/logo.svg", "sizes": "192x192", "type": "image/svg+xml" }
+  ]
+}

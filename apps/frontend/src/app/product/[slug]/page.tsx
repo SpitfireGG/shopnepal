@@ -36,6 +36,19 @@ export default async function ProductPage({ params }:{ params: Promise<{slug:str
               {product.sizes && <span style={{fontSize:12, padding:'6px 10px', border:'1px solid hsl(0,0%,93%)', borderRadius:6}}>Sizes: {product.sizes.join(', ')}</span>}
             </div>
             <button className="banner-btn" style={{padding:'12px 28px', fontSize:14}} onClick={()=>{}}>Add to Bag</button>
+            <div style={{marginTop:16, display:'grid', gridTemplateColumns:'1fr 1fr', gap:10}}>
+              <Link href={`/visual-search`} style={{padding:'10px', border:'1px solid hsl(0,0%,93%)', borderRadius:8, textAlign:'center', fontSize:12}}>📷 Visual Search</Link>
+              <Link href={`/stylist?anchor=${product.id}`} style={{padding:'10px', border:'1px solid hsl(0,0%,93%)', borderRadius:8, textAlign:'center', fontSize:12}}>✨ AI Stylist</Link>
+              <Link href={`/provenance/${product.id}`} style={{padding:'10px', border:'1px solid hsl(0,0%,93%)', borderRadius:8, textAlign:'center', fontSize:12}}>🔗 Provenance Pass</Link>
+              <a href="#" style={{padding:'10px', border:'1px solid hsl(0,0%,93%)', borderRadius:8, textAlign:'center', fontSize:12, background:'hsl(0,0%,13%)', color:'#fff'}}>👓 AR Try-On</a>
+            </div>
+            <div style={{marginTop:16, padding:12, border:'1px dashed hsl(0,0%,93%)', borderRadius:8, background:'hsl(152,51%,98%)'}}>
+              <p style={{fontSize:12, fontWeight:600}}>AR Try-On • model-viewer</p>
+              <div style={{height:160, background:'#fff', borderRadius:8, marginTop:8, display:'grid', placeItems:'center', border:'1px solid hsl(0,0%,93%)'}}>
+                <p style={{fontSize:12, color:'hsl(0,0%,47%)'}}>Camera preview — {product.title}<br/>Move to fit • Pinch to scale</p>
+              </div>
+              <p style={{fontSize:11, color:'hsl(0,0%,47%)', marginTop:6}}>WebAR • No app • Works on mobile</p>
+            </div>
             <div style={{marginTop:24, display:'flex', gap:10}}>
               <Link href="/cart" className="btn-newsletter" style={{padding:'10px 18px', background:'hsl(0,0%,13%)', color:'#fff', borderRadius:6}}>Go to Bag</Link>
               <Link href="/" className="btn-newsletter" style={{padding:'10px 18px', background:'#fff', color:'hsl(0,0%,13%)', border:'1px solid hsl(0,0%,93%)', borderRadius:6}}>Continue Shopping</Link>
