@@ -1,0 +1,44 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: shopnepal_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: shopnepal
+      POSTGRES_USER: shopnepal
+      POSTGRES_PASSWORD: shopnepal123
+    ports:
+      - "5434:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U shopnepal -d shopnepal"]
+      interval: 5s
+      retries: 10
+
+  backend:
+    build:
+      context: .
+      dockerfile: apps/backend/Dockerfile
+    container_name: shopnepal_backend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: postgres://shopnepal:shopnepal123@postgres:5432/shopnepal
+      PORT: 3000
+      STATIC_ROOT: /app/public
+      ADMIN_USER: admin
+      ADMIN_PASSWORD: shopnepal123
+      PUBLIC_BASE_URL: http://localhost:3000
+      ESEWA_ENV: test
+      ESEWA_PRODUCT_CODE: EPAYTEST
+      ESEWA_SECRET_KEY: 8gBm/:&EnhH.1/q
+      KHALTI_ENV: test
+      KHALTI_SECRET_KEY: live_secret_key_68791341fdd94846a146f0457ff7b455
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  pgdata:

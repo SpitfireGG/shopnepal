@@ -1,0 +1,13 @@
+{
+  "name": "shopnepal-monorepo",
+  "private": true,
+  "workspaces": ["apps/*"],
+  "scripts": {
+    "dev:backend": "npm --prefix apps/backend run dev",
+    "dev:frontend": "npm --prefix apps/frontend run dev -- --port 3002",
+    "dev:admin": "npm --prefix apps/admin run dev -- --port 3003",
+    "build": "npm --prefix apps/backend run build && npm --prefix apps/frontend run build && npm --prefix apps/admin run build",
+    "docker:up": "docker compose up -d --build",
+    "docker:down": "docker compose down"
+  }
+}
